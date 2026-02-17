@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SalaryWealth Calculator</title>
+
+<style>
+body{
+font-family:Arial;
+background:#f4f7fb;
+padding:30px;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+background:white;
+padding:25px;
+border-radius:12px;
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+input{
+width:100%;
+padding:10px;
+margin:10px 0;
+}
+
+button{
+padding:12px;
+background:#0a66ff;
+color:white;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+}
+
+.result{
+margin-top:20px;
+background:#eef3ff;
+padding:20px;
+border-radius:10px;
+}
+
+.result p{
+margin:8px 0;
+font-size:18px;
+}
+
+.highlight{
+font-size:24px;
+font-weight:bold;
+color:#0a66ff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>SalaryWealth Income Growth Calculator</h2>
+
+<label>Current Annual Salary (₹)</label>
+<input type="number" id="salary" value="1000000">
+
+<label>Years in Future</label>
+<input type="number" id="years" value="10">
+
+<label>Annual Hike (%)</label>
+<input type="number" id="hike" value="8">
+
+<button onclick="calculate()">Calculate Future Income</button>
+
+<div id="output" class="result"></div>
+
+</div>
+
+<script>
+
+// ---------- TAX CALCULATION (NEW REGIME INDIA) ----------
+function calculateTax(income){
+
+let tax = 0;
+
+if(income > 1500000){
+tax += (income - 1500000) * 0.30;
+income = 1500000;
+}
+
+if(income > 1200000){
+tax += (income - 1200000) * 0.20;
+income = 1200000;
+}
+
+if(income > 900000){
+tax += (income - 900000) * 0.15;
+income = 900000;
+}
+
+if(income > 600000){
+tax += (income - 600000) * 0.10;
+income = 600000;
+}
+
+if(income > 300000){
+tax += (income - 300000) * 0.05;
+}
+
+return tax;
+}
+
+// ---------- MAIN CALCULATOR ----------
+function calculate(){
+
+let currentSalary = Number(document.getElementById("salary").value);
+let years = Number(document.getElementById("years").value);
+let hike = Number(document.getElementById("hike").value)/100;
+
+// future salary
+let futureSalary = currentSalary * Math.pow(1 + hike, years);
+
+// tax
+let tax = calculateTax(futureSalary);
+
+// in hand
+let inHand = futureSalary - tax;
+
+// monthly
+let monthly = inHand / 12;
+
+// growth
+let increase = futureSalary - currentSalary;
+let growthPercent = (increase / currentSalary) * 100;
+
+// display
+document.getElementById("output").innerHTML = `
+
+<p class="highlight">Future CTC after ${years} years: ₹${Math.round(futureSalary).toLocaleString()}</p>
+
+<p>Estimated income tax: ₹${Math.round(tax).toLocaleString()}</p>
+
+<p>Annual in-hand salary: ₹${Math.round(inHand).toLocaleString()}</p>
+
+<p>Monthly take-home salary: ₹${Math.round(monthly).toLocaleString()}</p>
+
+<p>Total growth: ${growthPercent.toFixed(2)}%</p>
+
+<p>Absolute increase: ₹${Math.round(increase).toLocaleString()}</p>
+
+`;
+
+}
+
+</script>
+
+</body>
+</html>
