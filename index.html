@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SalaryWealth Calculator</title>
+
+<!-- CHART LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+font-family:Arial;
+background:#f4f7fb;
+padding:30px;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+background:white;
+padding:30px;
+border-radius:14px;
+box-shadow:0 15px 40px rgba(0,0,0,.08);
+}
+
+input{
+width:100%;
+padding:10px;
+margin:10px 0;
+}
+
+button{
+padding:12px;
+background:#0a66ff;
+color:white;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+width:100%;
+}
+
+.results{
+margin-top:25px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
+}
+
+.card{
+background:#f1f5ff;
+padding:20px;
+border-radius:10px;
+text-align:center;
+}
+
+.card h4{
+margin:0;
+font-size:14px;
+color:#555;
+}
+
+.card p{
+margin:8px 0 0;
+font-size:22px;
+font-weight:bold;
+color:#0a66ff;
+}
+
+.summary{
+margin-top:20px;
+padding:15px;
+background:#eef3ff;
+border-radius:10px;
+}
+
+.chart-box{
+margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>SalaryWealth Income Growth Calculator</h2>
+
+<label>Current Annual Salary (₹)</label>
+<input type="number" id="salary" value="1000000">
+
+<label>Years in Future</label>
+<input type="number" id="years" value="10">
+
+<label>Annual Hike (%)</label>
+<input type="number" id="hike" value="8">
+
+<button onclick="calculate()">Calculate Future Income</button>
+
+<div id="output"></div>
+
+<div class="chart-box">
+<canvas id="salaryChart"></canvas>
+</div>
+
+</div>
+
+<script>
+
+let chart;
+
+// ---------- TAX ----------
+function calculateTax(income){
+let tax=0;
+
+if(income>1500000){ tax+=(income-1500000)*0.30; income=1500000;}
+if(income>1200000){ tax+=(income-1200000)*0.20; income=1200000;}
+if(income>900000){ tax+=(income-900000)*0.15; income=900000;}
+if(income>600000){ tax+=(income-600000)*0.10; income=600000;}
+if(income>300000){ tax+=(income-300000)*0.05;}
+
+return tax;
+}
+
+// ---------- MAIN ----------
+function calculate(){
+
+let currentSalary=Number(document.getElementById("salary").value);
+let years=Number(document.getElementById("years").value);
+let hike=Number(document.getElementById("hike").value)/100;
+
+// yearly data for chart
+let salaries=[];
+let labels=[];
+let salary=currentSalary;
+
+for(let i=1;i<=years;i++){
+salary=salary*(1+hike);
+salaries.push(Math.round(salary));
+labels.push("Year "+i);
+}
+
+// final year salary
+let futureSalary=salary;
+
+let tax=calculateTax(futureSalary);
+let inHand=futureSalary-tax;
+let monthly=inHand/12;
+let increase=futureSalary-currentSalary;
+let growthPercent=(increase/currentSalary)*100;
+
+// dashboard
+document.getElementById("output").innerHTML=`
+
+<div class="results">
+
+<div class="card">
+<h4>Future CTC</h4>
+<p>₹${Math.round(futureSalary).toLocaleString()}</p>
+</div>
+
+<div class="card">
+<h4>Income Tax</h4>
+<p>₹${Math.round(tax).toLocaleString()}</p>
+</div>
+
+<div class="card">
+<h4>Annual In-Hand</h4>
+<p>₹${Math.round(inHand).toLocaleString()}</p>
+</div>
+
+<div class="card">
+<h4>Monthly Take-Home</h4>
+<p>₹${Math.round(monthly).toLocaleString()}</p>
+</div>
+
+</div>
+
+<div class="summary">
+Growth: <b>${growthPercent.toFixed(2)}%</b><br>
+Absolute Increase: <b>₹${Math.round(increase).toLocaleString()}</b>
+</div>
+`;
+
+// ---------- DRAW CHART ----------
+if(chart) chart.destroy();
+
+chart=new Chart(document.getElementById("salaryChart"),{
+type:"line",
+data:{
+labels:labels,
+datasets:[{
+label:"Projected Salary",
+data:salaries,
+borderWidth:3,
+fill:false
+}]
+},
+options:{
+responsive:true,
+plugins:{
+legend:{display:false}
+}
+}
+});
+
+}
+
+</script>
+
+</body>
+</html>
